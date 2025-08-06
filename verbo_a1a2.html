@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>西语动词变位练习 - A1/A2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      background: #f7f9fc;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    select, input, button {
+      font-size: 16px;
+      padding: 8px;
+      margin: 10px 0;
+      width: 90%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      margin-top: 20px;
+    }
+    .feedback {
+      margin-top: 15px;
+      font-weight: bold;
+      min-height: 1.5em;
+    }
+    #meaning {
+      color: #555;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>西语动词变位练习 (A1-A2)</h1>
+
+  <label for="tense">选择时态：</label><br />
+  <select id="tense">
+    <option value="presente">现在时 (Presente)</option>
+    <option value="indefinido">简单过去时 (Pretérito indefinido)</option>
+    <option value="imperfecto">过去未完成时 (Pretérito imperfecto)</option>
+  </select>
+
+  <div class="card">
+    <div id="question" style="font-size: 22px; margin-bottom: 6px;"></div>
+    <div id="meaning"></div>
+    <input type="text" id="answer" placeholder="请输入正确变位" autocomplete="off" />
+    <button onclick="checkAnswer()">提交答案</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <script>
+    const pronombres = ["yo", "tú", "él/ella/usted", "nosotros/as", "vosotros/as", "ellos/ellas/ustedes"];
+
+    const verbos = {
+      "compartir": {
+        "meaning": "分享",
+        "presente": ["comparto", "compartes", "comparte", "compartimos", "compartís", "comparten"],
+        "indefinido": ["compartí", "compartiste", "compartió", "compartimos", "compartisteis", "compartieron"],
+        "imperfecto": ["compartía", "compartías", "compartía", "compartíamos", "compartíais", "compartían"]
+      },
+      "conocer": {
+        "meaning": "认识",
+        "presente": ["conozco", "conoces", "conoce", "conocemos", "conocéis", "conocen"],
+        "indefinido": ["conocí", "conociste", "conoció", "conocimos", "conocisteis", "conocieron"],
+        "imperfecto": ["conocía", "conocías", "conocía", "conocíamos", "conocíais", "conocían"]
+      },
+      "gustar": {
+        "meaning": "喜欢",
+        "presente": ["gusto", "gustas", "gusta", "gustamos", "gustáis", "gustan"],
+        "indefinido": ["gusté", "gustaste", "gustó", "gustamos", "gustasteis", "gustaron"],
+        "imperfecto": ["gustaba", "gustabas", "gustaba", "gustábamos", "gustabais", "gustaban"]
+      },
+      "cenar": {
+        "meaning": "吃晚饭",
+        "presente": ["ceno", "cenas", "cena", "cenamos", "cenáis", "cenan"],
+        "indefinido": ["cené", "cenaste", "cenó", "cenamos", "cenasteis", "cenaron"],
+        "imperfecto": ["cenaba", "cenabas", "cenaba", "cenábamos", "cenabais", "cenaban"]
+      },
+      "estudiar": {
+        "meaning": "学习",
+        "presente": ["estudio", "estudias", "estudia", "estudiamos", "estudiáis", "estudian"],
+        "indefinido": ["estudié", "estudiaste", "estudió", "estudiamos", "estudiasteis", "estudiaron"],
+        "imperfecto": ["estudiaba", "estudiabas", "estudiaba", "estudiábamos", "estudiabais", "estudiaban"]
+      },
+      "tomar": {
+        "meaning": "拿，喝",
+        "presente": ["tomo", "tomas", "toma", "tomamos", "tomáis", "toman"],
+        "indefinido": ["tomé", "tomaste", "tomó", "tomamos", "tomasteis", "tomaron"],
+        "imperfecto": ["tomaba", "tomabas", "tomaba", "tomábamos", "tomabais", "tomaban"]
+      },
+      "hablar": {
+        "meaning": "说",
+        "presente": ["hablo", "hablas", "habla", "hablamos", "habláis", "hablan"],
+        "indefinido": ["hablé", "hablaste", "habló", "hablamos", "hablasteis", "hablaron"],
+        "imperfecto": ["hablaba", "hablabas", "hablaba", "hablábamos", "hablabais", "hablaban"]
+      },
+      "creer": {
+        "meaning": "相信",
+        "presente": ["creo", "crees", "cree", "creemos", "creéis", "creen"],
+        "indefinido": ["creí", "creíste", "creyó", "creímos", "creísteis", "creyeron"],
+        "imperfecto": ["creía", "creías", "creía", "creíamos", "creíais", "creían"]
+      },
+      "buscar": {
+        "meaning": "找",
+        "presente": ["busco", "buscas", "busca", "buscamos", "buscáis", "buscan"],
+        "indefinido": ["busqué", "buscaste", "buscó", "buscamos", "buscasteis", "buscaron"],
+        "imperfecto": ["buscaba", "buscabas", "buscaba", "buscábamos", "buscabais", "buscaban"]
+      },
+      "pagar": {
+        "meaning": "付钱",
+        "presente": ["pago", "pagas", "paga", "pagamos", "pagáis", "pagan"],
+        "indefinido": ["pagué", "pagaste", "pagó", "pagamos", "pagasteis", "pagaron"],
+        "imperfecto": ["pagaba", "pagabas", "pagaba", "pagábamos", "pagabais", "pagaban"]
+      },
+      "querer": {
+        "meaning": "想，要",
+        "presente": ["quiero", "quieres", "quiere", "queremos", "queréis", "quieren"],
+        "indefinido": ["quise", "quisiste", "quiso", "quisimos", "quisisteis", "quisieron"],
+        "imperfecto": ["quería", "querías", "quería", "queríamos", "queríais", "querían"]
+      },
+      "poder": {
+        "meaning": "能够",
+        "presente": ["puedo", "puedes", "puede", "podemos", "podéis", "pueden"],
+        "indefinido": ["pude", "pudiste", "pudo", "pudimos", "pudisteis", "pudieron"],
+        "imperfecto": ["podía", "podías", "podía", "podíamos", "podíais", "podían"]
+      },
+      "empezar": {
+        "meaning": "开始",
+        "presente": ["empiezo", "empiezas", "empieza", "empezamos", "empezáis", "empiezan"],
+        "indefinido": ["empecé", "empezaste", "empezó", "empezamos", "empezasteis", "empezaron"],
+        "imperfecto": ["empezaba", "empezabas", "empezaba", "empezábamos", "empezabais", "empezaban"]
+      },
+      "comenzar": {
+        "meaning": "开始",
+        "presente": ["comienzo", "comienzas", "comienza", "comenzamos", "comenzáis", "comienzan"],
+        "indefinido": ["comencé", "comenzaste", "comenzó", "comenzamos", "comenzasteis", "comenzaron"],
+        "imperfecto": ["comenzaba", "comenzabas", "comenzaba", "comenzábamos", "comenzabais", "comenzaban"]
+      },
+      "sentir": {
+        "meaning": "感觉",
+        "presente": ["siento", "sientes", "siente", "sentimos", "sentís", "sienten"],
+        "indefinido": ["sentí", "sentiste", "sintió", "sentimos", "sentisteis", "sintieron"],
+        "imperfecto": ["sentía", "sentías", "sentía", "sentíamos", "sentíais", "sentían"]
+      },
+      "venir": {
+        "meaning": "来",
+        "presente": ["vengo", "vienes", "viene", "venimos", "venís", "vienen"],
+        "indefinido": ["vine", "viniste", "vino", "vinimos", "vinisteis", "vinieron"],
+        "imperfecto": ["venía", "venías", "venía", "veníamos", "veníais", "venían"]
+      },
+      "ser": {
+        "meaning": "是（本质）",
+        "presente": ["soy", "eres", "es", "somos", "sois", "son"],
+        "indefinido": ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"],
+        "imperfecto": ["era", "eras", "era", "éramos", "erais", "eran"]
+      },
+      "ir": {
+        "meaning": "去",
+        "presente": ["voy", "vas", "va", "vamos", "vais", "van"],
+        "indefinido": ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"],
+        "imperfecto": ["iba", "ibas", "iba", "íbamos", "ibais", "iban"]
+      },
+      "tener": {
+        "meaning": "有",
+        "presente": ["tengo", "tienes", "tiene", "tenemos", "tenéis", "tienen"],
+        "indefinido": ["tuve", "tuviste", "tuvo", "tuvimos", "tuvisteis", "tuvieron"],
+        "imperfecto": ["tenía", "tenías", "tenía", "teníamos", "teníais", "tenían"]
+      },
+      "comer": {
+        "meaning": "吃",
+        "presente": ["como", "comes", "come", "comemos", "coméis", "comen"],
+        "indefinido": ["comí", "comiste", "comió", "comimos", "comisteis", "comieron"],
+        "imperfecto": ["comía", "comías", "comía", "comíamos", "comíais", "comían"]
+      },
+      "vivir": {
+        "meaning": "生活 / 居住",
+        "presente": ["vivo", "vives", "vive", "vivimos", "vivís", "viven"],
+        "indefinido": ["viví", "viviste", "vivió", "vivimos", "vivisteis", "vivieron"],
+        "imperfecto": ["vivía", "vivías", "vivía", "vivíamos", "vivíais", "vivían"]
+      },
+      "estar": {
+        "meaning": "在（状态）",
+        "presente": ["estoy", "estás", "está", "estamos", "estáis", "están"],
+        "indefinido": ["estuve", "estuviste", "estuvo", "estuvimos", "estuvisteis", "estuvieron"],
+        "imperfecto": ["estaba", "estabas", "estaba", "estábamos", "estabais", "estaban"]
+      }
+    };
+
+    let verboActual = "";
+    let personaActual = 0;
+
+    function nuevaPregunta() {
+      const tiempo = document.getElementById("tense").value;
+      const keys = Object.keys(verbos);
+      verboActual = keys[Math.floor(Math.random() * keys.length)];
+      personaActual = Math.floor(Math.random() * pronombres.length);
+      
+      document.getElementById("question").innerText = `${pronombres[personaActual]} (${verboActual}, ${tiempo})`;
+      document.getElementById("meaning").innerText = `中文意思：${verbos[verboActual].meaning}`;
+      document.getElementById("feedback").innerText = "";
+      document.getElementById("answer").value = "";
+      document.getElementById("answer").focus();
+    }
+
+    function checkAnswer() {
+      const tiempo = document.getElementById("tense").value;
+      const userAnswer = document.getElementById("answer").value.trim().toLowerCase();
+      const correcta = verbos[verboActual][tiempo][personaActual];
+      const feedback = document.getElementById("feedback");
+
+      if (userAnswer === correcta) {
+        feedback.innerText = "✅ 正确！";
+        feedback.style.color = "green";
+      } else {
+        feedback.innerText = `❌ 错误。正确答案是：${correcta}`;
+        feedback.style.color = "red";
+      }
+      setTimeout(nuevaPregunta, 1800);
+    }
+
+    window.onload = function() {
+      nuevaPregunta();
+      document.getElementById("tense").onchange = nuevaPregunta;
+    };
+  </script>
+</body>
+</html>
